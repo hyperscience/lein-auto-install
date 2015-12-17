@@ -1,4 +1,4 @@
-(defproject lein-auto-install "0.1.1"
+(defproject lein-auto-install "0.1.2-SNAPSHOT"
   :description "A leiningen plugin to automatically run install for checkouts."
   :url "https://github.com/hyperscience/lein-auto-install"
   :license {:name "Eclipse Public License"

@@ -4,7 +4,7 @@ A Leiningen plugin to automatically run `lein install` for checkouts projects.
 
 ## Usage
 
-Put `[lein-auto-install "0.1.0"]` into the `:plugins` vector of your project.clj and add `.lein-auto-install` to your project's `.gitignore`.
+Put `[lein-auto-install "0.1.1"]` into the `:plugins` vector of your project.clj and add `.lein-auto-install` to your project's `.gitignore`.
 
 After the above setup, you can use lein and checkouts like you normally would, except you should never have to run `lein install` for a checkouts dependency ever again.
 
