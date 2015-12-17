@@ -31,25 +31,29 @@
            (cons path (checkouts-tree % (conj already-seen h))))
         (.listFiles (io/file project-root-dir "checkouts")))))
 
-(defn- traverse-seq
+(defn- traverse
   "Takes a tree of checkout paths as returned by checkouts-tree and returns a
   seq of checkout paths representing a post order traversal."
   [trees]
-  (mapcat #(concat (traverse-seq (rest %)) [(first %)]) trees))
+  (mapcat #(concat (traverse (rest %)) [(first %)]) trees))
 
 (defn- install-checkouts [f & args]
   (let [project (first args)
         state-file (io/file (:root project) ".lein-auto-install")
         last-state (set
                     (when-let [c (slurp-if-exists state-file)] (read-string c)))
-        checkouts-seq (traverse-seq (checkouts-tree (:root project)))
+        checkouts (distinct
+                   ; Checkouts are almost always symlinks, so canonicalize them
+                   ; before using.
+                   (map #(.getCanonicalPath (java.io.File. %))
+                    (traverse (checkouts-tree (:root project)))))
         ; maps project path -> project.clj hash
-        project-hash-map (for-map [c checkouts-seq] c (project-hash c))]
+        project-hash-map (for-map [c checkouts] c (project-hash c))]
     (with-programs [lein]
-      (doseq [c checkouts-seq]
-        (when-not (last-state (project-hash-map c))
-          (lein "install" {:out *out*, :err *err* :dir c})
-          (flush))))
+      (doseq [c checkouts
+              :when (not (last-state (project-hash-map c)))]
+        (lein "install" {:out *out*, :err *err* :dir c})
+        (flush)))
     (let [current-state (set (vals project-hash-map))]
       (when (not= last-state current-state)
         (spit state-file (pr-str current-state)))))
