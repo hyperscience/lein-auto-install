@@ -2,9 +2,7 @@
   (:require [robert.hooke]
             [leiningen.core.eval]
             [clojure.java.io :as io]
-            [clojure.pprint]
             [digest]
-            [plumbing.core :refer :all]
             [me.raynes.conch :refer [with-programs]]))
 
 (defn- slurp-if-exists [filename]
@@ -48,7 +46,7 @@
                    (map #(.getCanonicalPath (java.io.File. %))
                     (traverse (checkouts-tree (:root project)))))
         ; maps project path -> project.clj hash
-        project-hash-map (for-map [c checkouts] c (project-hash c))]
+        project-hash-map (zipmap checkouts (map project-hash checkouts))]
     (with-programs [lein]
       (doseq [c checkouts
               :when (not (last-state (project-hash-map c)))]
